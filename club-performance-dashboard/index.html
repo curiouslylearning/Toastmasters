@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>District 95 Club Performance Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <div class="background-glow"></div>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <p class="kicker">District Intelligence</p>
+        <h1>District 95 Club Performance Cockpit</h1>
+        <p class="subtitle">
+          Explore club health from district to club level, compare momentum, and drill into local performance patterns.
+        </p>
+      </div>
+      <div class="hero-meta">
+        <p id="datasetStatus">Loading dataset...</p>
+        <button id="resetDrillBtn" type="button">Reset Drilldown</button>
+      </div>
+    </header>
+
+    <section class="controls card">
+      <label>
+        Toastmasters Year
+        <select id="tmYearSelect"></select>
+      </label>
+      <label>
+        Snapshot Date
+        <select id="asOfSelect"></select>
+      </label>
+      <label>
+        Division
+        <select id="divisionSelect"></select>
+      </label>
+      <label>
+        Club Status
+        <select id="statusSelect"></select>
+      </label>
+      <label>
+        Club Search
+        <input id="clubSearchInput" type="text" placeholder="Type club name...">
+      </label>
+    </section>
+
+    <section class="kpis" id="kpiGrid"></section>
+
+    <section class="breadcrumbs card" id="breadcrumbs"></section>
+
+    <section class="grid-two">
+      <article class="card panel">
+        <div class="panel-head">
+          <h2>Hierarchy Drilldown</h2>
+          <div class="inline-control">
+            <p id="hierarchySubtitle"></p>
+            <label>
+              Metric
+              <select id="hierarchyMetricSelect">
+                <option value="score">Avg Performance Score</option>
+                <option value="goals">Total Goals Met</option>
+                <option value="growth">Total Net Growth</option>
+                <option value="active">Total Active Members</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div id="hierarchyChart" class="chart"></div>
+      </article>
+      <article class="card panel">
+        <div class="panel-head">
+          <h2>Trend Over Time</h2>
+          <p id="trendSubtitle"></p>
+        </div>
+        <div id="trendChart" class="chart"></div>
+      </article>
+    </section>
+
+    <section class="grid-two">
+      <article class="card panel">
+        <div class="panel-head">
+          <h2>Club Comparison Map</h2>
+          <p>Bubble size = new members, color = net growth, click a bubble to drill to a club.</p>
+        </div>
+        <div id="scatterChart" class="chart"></div>
+      </article>
+      <article class="card panel">
+        <div class="panel-head">
+          <h2>Top & At-Risk Clubs</h2>
+          <p>Performance score blends goals, growth, officer training, and dues timeliness.</p>
+        </div>
+        <div class="table-wrap">
+          <table id="clubTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Club</th>
+                <th>Div/Area</th>
+                <th>Goals</th>
+                <th>Growth</th>
+                <th>Active</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid-two">
+      <article class="card panel">
+        <div class="panel-head">
+          <h2>Drilldown Details</h2>
+          <p id="detailsSubtitle"></p>
+        </div>
+        <div id="detailsPanel" class="details-list"></div>
+      </article>
+      <article class="card panel">
+        <div class="panel-head">
+          <h2>Insights</h2>
+          <p>Auto-generated observations from the current slice.</p>
+        </div>
+        <div id="insightPanel" class="insight-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
