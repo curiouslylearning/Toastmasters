@@ -1,0 +1,114 @@
+
+
+Just nu
+
+Dashboard data:
+1. Download with URL - for updates
+2b. Merge CSVs dashboard ClubPerformance data
+3. Clean the dashboard data
+5. Upload to SQL
+
+
+
+Ny struktur
+
+0. Main. Steps through all the modules
+
+0a. Login and password to SQL file
+
+Lägg ihop 1, 1a, 1b till samma.
+1. Generate dataframe to download through 1a and 1c. Populating the year and months between to be download in a loop
+1a. Get latest date on homepage 
+1b. get latest date in database SQL (or CSV). 
+1c. Utils (support functions e.g., date conversions)
+
+2. Download CSVs
+
+3. Merge CSVs to a Dataframe
+
+4. Clean the large Dataframe
+
+5. Upload to SQL (or merge with existing CSV)
+
+
+
+Do similar for FindaClub
+
+
+
+-----
+
+Förslag eller inspiration från chatgpt:
+
+
+download.py:
+download_to_file
+download_from_plan
+
+build_download_plan - bra funktionsnamn istället för generate dataframe from download
+
+
+
+merge.py
+clean.py
+
+
+load_sql.py
+
+Utils_scrape.py
+Utils_date.py
+Utils_other.py
+
+
+config.py - bättre än credentials.py pga att lösenord annars kan fastna i tracebacks o spridas 
+
+
+
+
+----
+
+
+
+
+Vad kan början vara?
+Starta med en main()?
+
+
+
+Bra med en Testmapp. Där kan moduler ligga som jag använder för att testa saker. Tex kolla senaste tillgängliga datum på dashboard
+Eller för att göra analyser i pandas
+
+Kanske skippar jag olika mappar för de moduler som hör ihop. Räcker att ha den i samma mapp.
+
+En mapp annars för "utils". Olika hjälpfunktioner
+
+
+
+
+
+
+
+https://www.bing.com/search?q=organize%20your%20python%20code&qs=n&form=QBRE&sp=-1&ghc=1&lq=0&pq=organize%20your%20python%20cod&sc=3-24&sk=&cvid=11E1E1DE237249CC968EA29E359EF6EE
+
+Project Structure
+
+A well-structured project is essential for collaboration and scalability. A typical Python project layout includes:
+
+project_name/
+├── project_name/
+│ ├── __init__.py
+│ ├── module1.py
+│ ├── module2.py
+│
+├── tests/
+│ ├── __init__.py
+│ ├── test_module1.py
+│ ├── test_module2.py
+│
+├── docs/
+│ ├── index.rst
+│
+├── setup.py
+├── requirements.txt
+├── README.md
+├── .gitignore

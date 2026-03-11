@@ -1,0 +1,7 @@
+
+
+user: "postgres"
+password: "<YOUR_PASSWORD>"
+host: "127.0.0.1"
+port: 5432
+database: "Toastmasters"
