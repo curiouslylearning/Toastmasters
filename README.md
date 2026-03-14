@@ -1,1 +1,1 @@
-Here I'm automating download of toastmaster data
+Here I'm automating downloading of toastmaster data
