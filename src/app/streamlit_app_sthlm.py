@@ -26,52 +26,18 @@ st.markdown("""**Hur många medlemmar är vi i Stockholm Toastmasters?**\n
 """, unsafe_allow_html=True)
 
 
-df_district = get_table_filter_district("ClubPerformance", "95")
+df_CP_d95 = get_table_filter_district("ClubPerformance", "95")
+df_DP_d95 = get_table_filter_district("DistrictPerformance", "95")
 
 
-print(df_district.columns)
+print(df_CP_d95.columns)
 
 #data = df_CP_d95[["TM_Year","Active Members", "Club Name"]]
-
-df_pivot = df_district.pivot_table(
-    index=["TM_Year"],
-    columns="Club Name",
-    values="Active Members",
-    aggfunc="max",
-).sort_index()
-
-
-#df_pivot = df_pivot.loc[:, df_pivot.max(axis=0) > 55] "klubbar som är större än 55
-df_pivot = df_pivot[["Stockholm Toastmaster Club", "Stockholm International", "Ericsson Stockholm Toastmasters", "Stockholm Speakers Club"]]
-
-print(df_pivot)
-
-
-
-
-st.write(df_pivot)
-st.line_chart(df_pivot, width=2000, height=250)
-
-
-df_district_filtered = df_district.loc[df_district["TM_Year"] == "2025-2026"]
-
-df_pivot2 = df_district_filtered.pivot_table(
-    index=["Month_Num_Fiscal"],
-    columns=["Club Name"],
-    values="Active Members",
-    aggfunc="max",
-).sort_index()
-
-print(df_pivot2)
-df_pivot2 = df_pivot2[["Stockholm Toastmaster Club", "Stockholm International", "Ericsson Stockholm Toastmasters", "Stockholm Speakers Club"]]
-
-st.line_chart(df_pivot2, height=250)
-
 
 
 tm_year_option = st.selectbox(
     "Which year do you want to see?",
-    sorted(df_district["TM_Year"].unique())
+    sorted(df_CP_d95["TM_Year"].unique())
 )
 
 
@@ -82,24 +48,53 @@ tm_year_option = st.selectbox(
 #This works like an auto-completion almost, when the user starts typing the dropdown alternatives filter auto
 Club_name = st.selectbox(
     "Start typing club name",
-    sorted(df_district["Club Name"].unique())
+    sorted(df_CP_d95["Club Name"].unique())
 )
 
 
 #df_CP_d95 = df_CP_d95[df_CP_d95["Club Name"]=="Stockholm Toastmaster Club"]
-df_filtered = df_district[
-    (df_district["Club Name"] == Club_name) &
-    (df_district["TM_Year"] == tm_year_option)
-]
+
+#Filteras efter användarinteraktionen ovan
+df_filtered_CP_d95 = df_CP_d95[
+    (df_CP_d95["Club Name"] == Club_name) &
+    (df_CP_d95["TM_Year"] == tm_year_option)
+    ]
+
+
+#---
+df_filtered_sort_DP = df_DP_d95[
+    (df_DP_d95["Club Name"] == Club_name) &
+    (df_DP_d95["TM_Year"] == tm_year_option)
+    ]
+
+#---
+
+#sorterar för att får max månad av senaste kalenderåret
+df_filtered_CP_d95 = df_filtered_CP_d95.sort_values(["CalendarYear", "Month_Num_Fiscal"],
+                                         ascending=[True, True])
+
+#sorterar för att får max månad av senaste kalenderåret
+df_filtered_sort_DP_d95 = df_filtered_sort_DP.sort_values(["CalendarYear", "Month_Num_Fiscal"],
+                                         ascending=[True, True])
+
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric(label= "Medlemmar just nu", value=df_filtered_CP_d95["Active Members"].iloc[-1], delta=df_filtered_CP_d95["Active Members"].iloc[-1] - df_filtered_CP_d95["Active Members"].iloc[-2])
+
+col2.metric(label= "Nya medlemmar", value=df_filtered_sort_DP_d95["New"].iloc[-1], delta=df_filtered_sort_DP_d95["New"].iloc[-1] - df_filtered_sort_DP_d95["New"].iloc[-2])
+
+col3.metric(label= "Avklarade Level1s", value=df_filtered_CP_d95["Level 1s"].iloc[-1], delta=df_filtered_CP_d95["Level 1s"].iloc[-1] - df_filtered_CP_d95["Level 1s"].iloc[-2])
+
 
 
 month_order = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"]
 
-if df_filtered.empty:
+if df_filtered_CP_d95.empty:
     st.warning("No data found for that TM year and club name. Check you spelling of the club name and try again.")
 else:
     chart_data = (
-        df_filtered.sort_values("Month_Num_Fiscal")
+        df_filtered_CP_d95.sort_values("Month_Num_Fiscal")
         .groupby(["Month_Num_Fiscal", "MonthOf"], as_index=False)["Active Members"]
         .max()
     )
@@ -123,8 +118,51 @@ else:
 
 
 
+if df_filtered_sort_DP.empty:
+    st.warning("No data found for that TM year and club name. Check you spelling of the club name and try again.")
+else:
+    chart_data = (
+        df_filtered_sort_DP.sort_values("Month_Num_Fiscal")
+        .groupby(["Month_Num_Fiscal", "MonthOf"], as_index=False)["New"]
+        .max()
+    )
+
+    chart = (
+        alt.Chart(chart_data)
+        .mark_line(point=True)
+        .encode(
+            x=alt.X("MonthOf:N", sort=month_order, title="Month"),
+            y=alt.Y("New:Q", title="New Members"),
+            tooltip=[
+                alt.Tooltip("MonthOf:N", title="Month"),
+                alt.Tooltip("New Members:Q", title="New Members"),
+            ],
+        )
+        .properties(height=250)
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+
+
+df_district_filtered = df_CP_d95.loc[df_CP_d95["TM_Year"] == tm_year_option]
+
+df_pivot2 = df_district_filtered.pivot_table(
+    index=["Month_Num_Fiscal"],
+    columns=["Club Name"],
+    values="Active Members",
+    aggfunc="max",
+).sort_index()
+
+print(df_pivot2)
+df_pivot2 = df_pivot2[["Stockholm Toastmaster Club", "Stockholm International", "Ericsson Stockholm Toastmasters", "Stockholm Speakers Club"]]
+
+st.line_chart(df_pivot2, height=250)
+
+
+
 chart_data2 = (
-        df_district
+        df_CP_d95
         .pivot_table(
             index=["Month_Num_Fiscal", "MonthOf"],
             values="Active Members",
@@ -139,7 +177,7 @@ print(chart_data2)
 print(chart_data2.index.duplicated().sum())
 
 
-max_members = df_district["Active Members"].max()
+max_members = df_CP_d95["Active Members"].max()
 
 add_slider = st.sidebar.slider(
     "Select a range of values",
@@ -149,7 +187,7 @@ add_slider = st.sidebar.slider(
 min_members, max_members = add_slider
 
 club_chart_data = (
-    df_district[df_district["TM_Year"] == tm_year_option]
+    df_CP_d95[df_CP_d95["TM_Year"] == tm_year_option]
     .groupby("Club Name", as_index=False)["Active Members"]
     .max()
     .sort_values("Active Members", ascending=False)
@@ -177,7 +215,7 @@ chart = (
 st.altair_chart(chart, use_container_width=True)
 
 
-df_pivot4 = df_district.pivot_table(
+df_pivot4 = df_CP_d95.pivot_table(
     index=["TM_Year"],
     values="Active Members",
     aggfunc="mean",
@@ -206,15 +244,15 @@ st.altair_chart(chart, use_container_width=True)
 
 
 #sorterar för att får max månad av senaste kalenderåret
-df_sort = df_district.sort_values(["CalendarYear", "Month_Num_Fiscal"],
-               ascending=[True, True])
+df_sort = df_CP_d95.sort_values(["CalendarYear", "Month_Num_Fiscal"],
+                                ascending=[True, True])
 
 year_max = df_sort["CalendarYear"].iloc[-1]
 month_num_fiscal_max = df_sort["Month_Num_Fiscal"].iloc[-1]
 
 
-df_district_max = df_district[
-    (df_district["Month_Num_Fiscal"] == month_num_fiscal_max)
+df_district_max = df_CP_d95[
+    (df_CP_d95["Month_Num_Fiscal"] == month_num_fiscal_max)
 ]
 
 
@@ -282,3 +320,27 @@ add_selectbox = st.sidebar.selectbox(
     'How would you like to be contacted?',
     ('Email', 'Home phone', 'Mobile phone')
 )
+
+
+df_pivot = df_CP_d95.pivot_table(
+    index=["TM_Year"],
+    columns="Club Name",
+    values="Active Members",
+    aggfunc="max",
+).sort_index()
+
+
+#df_pivot = df_pivot.loc[:, df_pivot.max(axis=0) > 55] "klubbar som är större än 55
+df_pivot = df_pivot[["Stockholm Toastmaster Club", "Stockholm International", "Ericsson Stockholm Toastmasters", "Stockholm Speakers Club"]]
+
+print(df_pivot)
+
+
+
+
+st.write(df_pivot)
+st.line_chart(df_pivot, width=2000, height=250)
+
+
+
+

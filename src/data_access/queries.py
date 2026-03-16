@@ -58,8 +58,9 @@ if __name__ == "__main__":
     #df_all = get_full_table("DistrictPerformance")
     #print(df_all.head(5))
 
-    #df_district = get_table_filter_district("DistrictPerformance", "95")
-    #print(df_district.head(5))
+    #df_CP_d95 = get_table_filter_district("DistrictPerformance", "95")
+    #print(df_CP_d95.head(5))
 
     df_tm_year = get_table_filter_tm_year("DistrictPerformance", "2025-2026")
     print(df_tm_year.head(5))
+    print(df_tm_year.columns)
